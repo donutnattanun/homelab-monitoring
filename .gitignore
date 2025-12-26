@@ -1,0 +1,13 @@
+# ===== Environment =====
+.env
+.env.*
+!.env.example
+# ===== Secrets =====
+data/**/secrets/*
+!data/**/secrets/.keep
+data/**/config/*.yml
+!data/**/config/configuration.yml
+# ===== Certificates =====
+nginx/cert/*
+!nginx/cert/.keep
+

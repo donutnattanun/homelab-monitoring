@@ -1,0 +1,89 @@
+
+services: 
+
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    ports:
+      - "${NGINX_PORT}:443"
+    volumes: 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/cert/:/etc/nginx/cert:ro
+    networks:
+      - auth_net
+      - monitor_net
+    depends_on: 
+      - authelia
+
+  authelia:
+    container_name: authelia
+    image: docker.io/authelia/authelia:latest
+    restart: 'unless-stopped'
+    networks:
+      - auth_net
+    environment:
+      AUTHELIA_LOG_LEVEL: ${AUTHELIA_LOG_LEVEL}
+      AUTHELIA_SERVER_BUFFERS_READ: ${AUTHELIA_SERVER_BUFFERS_READ}
+    volumes:
+      - '${PWD}/data/authelia/config:/config'
+      - '${PWD}/data/authelia/secrets:/secrets'
+  
+  db:
+    image: postgres:16
+    container_name: authelia-db
+    networks:
+      - auth_net
+    environment:
+      POSTGRES_USER: ${AUTHLIA_DB_USER}
+      POSTGRES_PASSWORD_FILE: /run/secrets/STORAGE_PASSWORD
+      POSTGRES_DB: ${AUTHELIA_DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    pid: host
+    networks:
+      - monitor_net
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    networks:
+      - monitor_net
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    networks:
+      - monitor_net
+
+secrets:
+  STORAGE_PASSWORD:
+    file: ./data/authelia/secrets/STORAGE_PASSWORD
+
+networks:
+  auth_net:
+    driver: bridge
+    internal: true
+  monitor_net:
+    driver: bridge
+    internal: true
+
+volumes:
+  postgres_data:

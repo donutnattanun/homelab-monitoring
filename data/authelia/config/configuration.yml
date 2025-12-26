@@ -1,0 +1,37 @@
+host: 0.0.0.0
+port: 9091
+
+jwt_secret: "file:/secrets/JWT_SECRET"
+
+session:
+  secret: "file:/secrets/SESSION_SECRET"
+  expiration: 3600
+  inactivity: 300
+  remember_me: 1M
+  cookies:
+    - name: authelia_session
+      domain: auth.localhost
+      authelia_url: https://auth.localhost:9091
+      expiration: 1h
+
+storage:
+  encryption_key: "file:/secrets/STORAGE_ENCRYPTION_KEY"
+  postgres:
+    host: authelia-db
+    port: 5432
+    database: authelia
+    username: authelia
+    password: "file:/secret/STORAGE_PASSWORD"
+
+authentication_backend:
+  file: 
+    path: /config/users.yml
+access_control:
+  default_policy: one_factor
+  rules:
+    - domain: auth.localhost
+      policy: one_factor
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt
