@@ -35,12 +35,15 @@ services:
     networks:
       - auth_net
     environment:
-      POSTGRES_USER: ${AUTHLIA_DB_USER}
-      POSTGRES_PASSWORD_FILE: /run/secrets/STORAGE_PASSWORD
+      POSTGRES_USER: ${AUTHELIA_DB_USER}
+      #POSTGRES_PASSWORD_FILE: /run/secrets/STORAGE_PASSWORD
+      POSTGRES_PASSWORD: StrongPassword123
       POSTGRES_DB: ${AUTHELIA_DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+    #secrets:
+    #  - STORAGE_PASSWORD
+
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node-exporter
@@ -70,6 +73,18 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     restart: unless-stopped
+    environment:
+      - GF_AUTH_PROXY_ENABLED=true             # เปิดระบบรับ User จาก Proxy
+      - GF_AUTH_PROXY_HEADER_NAME=Remote-User  # บอกว่าชื่อ User อยู่ใน Header ไหน (ต้องตรงกับ Nginx)
+      - GF_AUTH_PROXY_HEADER_PROPERTY=username # ให้เอาค่านั้นไปเป็น username
+      - GF_AUTH_PROXY_AUTO_SIGN_UP=true
+      - GF_ANALYTICS_REPORTING_ENABLED=false # ปิดการส่งสถิติการใช้งาน
+      - GF_CHECK_FOR_UPDATES=false           # ปิดการเช็คเวอร์ชันใหม่
+      - GF_NEWS_FEED_ENABLED=false            # ปิดการดึงข่าวจาก Grafana
+    networks:
+      - monitor_net
+  httpbin:
+    image: kennethreitz/httpbin
     networks:
       - monitor_net
 
@@ -80,10 +95,10 @@ secrets:
 networks:
   auth_net:
     driver: bridge
-    internal: true
+    internal: false
   monitor_net:
     driver: bridge
-    internal: true
+    internal: false
 
 volumes:
   postgres_data:

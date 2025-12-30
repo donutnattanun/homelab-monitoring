@@ -10,8 +10,8 @@ session:
   remember_me: 1M
   cookies:
     - name: authelia_session
-      domain: auth.localhost
-      authelia_url: https://auth.localhost:9091
+      domain: homelab.local
+      authelia_url: https://auth.homelab.local
       expiration: 1h
 
 storage:
@@ -21,7 +21,7 @@ storage:
     port: 5432
     database: authelia
     username: authelia
-    password: "file:/secret/STORAGE_PASSWORD"
+    password: "StrongPassword123"
 
 authentication_backend:
   file: 
