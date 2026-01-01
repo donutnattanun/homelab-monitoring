@@ -15,6 +15,8 @@ services:
       - monitor_net
     depends_on: 
       - authelia
+      - grafana
+      - httpbin
 
   authelia:
     container_name: authelia
@@ -36,13 +38,12 @@ services:
       - auth_net
     environment:
       POSTGRES_USER: ${AUTHELIA_DB_USER}
-      #POSTGRES_PASSWORD_FILE: /run/secrets/STORAGE_PASSWORD
-      POSTGRES_PASSWORD: StrongPassword123
+      #POSTGRES_PASSWORD: ${AUTHELIA_DB_PASSWD}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       POSTGRES_DB: ${AUTHELIA_DB_NAME}
     volumes:
+      - ./data/authelia/secrets/STORAGE_PASSWORD:/run/secrets/db_password:ro
       - postgres_data:/var/lib/postgresql/data
-    #secrets:
-    #  - STORAGE_PASSWORD
 
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
@@ -68,6 +69,8 @@ services:
       - monitor_net
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - node-exporter
 
   grafana:
     image: grafana/grafana:latest
@@ -77,10 +80,14 @@ services:
       - GF_AUTH_PROXY_ENABLED=true             # เปิดระบบรับ User จาก Proxy
       - GF_AUTH_PROXY_HEADER_NAME=Remote-User  # บอกว่าชื่อ User อยู่ใน Header ไหน (ต้องตรงกับ Nginx)
       - GF_AUTH_PROXY_HEADER_PROPERTY=username # ให้เอาค่านั้นไปเป็น username
-      - GF_AUTH_PROXY_AUTO_SIGN_UP=true
+      - GF_AUTH_PROXY_AUTO_SIGN_UP=true       # เปิด auto sing in จาก nginx
       - GF_ANALYTICS_REPORTING_ENABLED=false # ปิดการส่งสถิติการใช้งาน
       - GF_CHECK_FOR_UPDATES=false           # ปิดการเช็คเวอร์ชันใหม่
       - GF_NEWS_FEED_ENABLED=false            # ปิดการดึงข่าวจาก Grafana
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - monitor_net
   httpbin:
@@ -98,7 +105,7 @@ networks:
     internal: false
   monitor_net:
     driver: bridge
-    internal: false
+    internal: true
 
 volumes:
   postgres_data:

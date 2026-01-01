@@ -1,0 +1,32 @@
+name: "Infrastructure CI"
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose
+        run: |
+          cp .env.example .env || touch .env
+          docker compose config -q
+          echo "✅ Docker Compose config is valid"
+
+      - name: Validate Nginx Config
+        uses: citihub/nginx-config-validator@v1.0.0
+        with:
+          config_file: ./nginx/nginx.conf
+
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: .
+          config_file: .yamllint.yml # ถ้าไม่มีไฟล์นี้มันจะใช้ default
+        continue-on-error: true # ยอมให้ผ่านได้ถ้ามีแค่ warning เรื่อง format
