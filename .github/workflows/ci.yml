@@ -28,8 +28,13 @@ jobs:
 
       - name: Validate Nginx Config
         uses: citihub/nginx-config-validator@v1.0.0
-        with:
-          config_file: ./nginx/nginx.conf
+        run: |
+          docker run --rm \
+            -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+            -v $(pwd)/nginx/conf.d:/etc/nginx/conf.d:ro \
+            -v $(pwd)/nginx/cert:/etc/nginx/cert:ro \
+            nginx:alpine nginx -t
+          echo "✅ Nginx configuration is valid"
 
       - name: YAML Lint
         uses: ibiqlik/action-yamllint@v3
