@@ -13,9 +13,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Validate Docker Compose
+      - name: Prepare environment for linting
         run: |
           cp .env.example .env || touch .env
+          
+          mkdir -p nginx/cert
+          touch nginx/cert/server.crt nginx/cert/server.key
+          echo "✅ Preparation complete"
+
+      - name: Validate Docker Compose
+        run: |
           docker compose config -q
           echo "✅ Docker Compose config is valid"
 
