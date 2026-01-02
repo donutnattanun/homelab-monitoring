@@ -18,7 +18,10 @@ jobs:
           cp .env.example .env || touch .env
           
           mkdir -p nginx/cert
-          touch nginx/cert/server.crt nginx/cert/server.key
+          touch nginx/cert/monitor.homelab.local.pem
+          touch nginx/cert/monitor.homelab.local-key.pem
+          touch nginx/cert/auth.homelab.local.pem
+          touch nginx/cert/auth.homelab.local-key.pem
           echo "✅ Preparation complete"
 
       - name: Validate Docker Compose
