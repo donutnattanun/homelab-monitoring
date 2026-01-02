@@ -27,7 +27,6 @@ jobs:
           echo "✅ Docker Compose config is valid"
 
       - name: Validate Nginx Config
-        uses: citihub/nginx-config-validator@v1.0.0
         run: |
           docker run --rm \
             -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
