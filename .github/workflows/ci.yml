@@ -18,10 +18,15 @@ jobs:
           cp .env.example .env || touch .env
           
           mkdir -p nginx/cert
-          touch nginx/cert/monitor.homelab.local.pem
-          touch nginx/cert/monitor.homelab.local-key.pem
-          touch nginx/cert/auth.homelab.local.pem
-          touch nginx/cert/auth.homelab.local-key.pem
+          openssl req -x509 -nodes -days 1 -newkey rsa:2048 \
+            -keyout nginx/cert/monitor.homelab.local-key.pem \
+            -out nginx/cert/monitor.homelab.local.pem \
+            -subj "/C=TH/ST=Bangkok/L=Bangkok/O=Test/CN=monitor.homelab.local"
+
+          openssl req -x509 -nodes -days 1 -newkey rsa:2048 \
+            -keyout nginx/cert/auth.homelab.local-key.pem \
+            -out nginx/cert/auth.homelab.local.pem \
+            -subj "/C=TH/ST=Bangkok/L=Bangkok/O=Test/CN=auth.homelab.local"
           echo "✅ Preparation complete"
 
       - name: Validate Docker Compose
