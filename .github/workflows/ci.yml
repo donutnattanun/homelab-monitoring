@@ -29,6 +29,9 @@ jobs:
       - name: Validate Nginx Config
         run: |
           docker run --rm \
+            --add-host authelia:127.0.0.1 \
+            --add-host grafana:127.0.0.1 \
+            --add-host httpbin:127.0.0.1 \
             -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
             -v $(pwd)/nginx/conf.d:/etc/nginx/conf.d:ro \
             -v $(pwd)/nginx/cert:/etc/nginx/cert:ro \
