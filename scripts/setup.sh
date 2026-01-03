@@ -44,12 +44,20 @@ if [ ! -f "data/authelia/secrets/STORAGE_PASSWORD" ]; then
   sed -i "s/password: \"StrongPassword123\"/password: \"$DB_PASSWORD\"/g" data/authelia/config/configuration.yml
   echo "✅ Generated STORAGE_PASSWORD"
 fi
-
 #gen login password
 RAW_ADMIN_PASS="admin123"
 mkdir -p data/authelia/config
 if [ ! -f "data/authelia/config/users.yml" ]; then
-  ADMIN_HASH=$(docker run --rm authelia/authelia:latest authelia hash-password "$RAW_ADMIN_PASS" | awk '{print $NF}')
+  RAW_HASH=$(docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password "$RAW_ADMIN_PASS") || {
+    echo "❌ Docker failed"
+    exit 1
+  }
+  ADMIN_HASH=$(echo "$RAW_HASH" | grep -o '\$argon2id\$[^ ]*' || true)
+  if [ -z "$ADMIN_HASH" ]; then
+    echo "❌ Error: Could not extract Argon2id hash from Authelia output."
+    echo "Debug: Output was: $RAW_HASH"
+    exit 1
+  fi
   echo ">> Creating default users.yml..."
   cat <<EOF >data/authelia/config/users.yml
 users:
