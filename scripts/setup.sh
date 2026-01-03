@@ -39,18 +39,23 @@ done
 # gen STORAGE_PASSWORD
 if [ ! -f "data/authelia/secrets/STORAGE_PASSWORD" ]; then
   openssl rand -hex 16 >"data/authelia/secrets/STORAGE_PASSWORD"
+  DB_PASSWORD=$(cat data/authelia/secrets/STORAGE_PASSWORD)
+  echo ">> Injecting DB Password into configuration.yml..."
+  sed -i "s/password: \"StrongPassword123\"/password: \"$DB_PASSWORD\"/g" data/authelia/config/configuration.yml
   echo "✅ Generated STORAGE_PASSWORD"
 fi
 
+#gen login password
+RAW_ADMIN_PASS="admin123"
 mkdir -p data/authelia/config
 if [ ! -f "data/authelia/config/users.yml" ]; then
+  ADMIN_HASH=$(docker run --rm authelia/authelia:latest authelia hash-password "$RAW_ADMIN_PASS" | awk '{print $NF}')
   echo ">> Creating default users.yml..."
   cat <<EOF >data/authelia/config/users.yml
 users:
   admin:
     displayname: "Default Admin"
-    # รหัสผ่านคือ "password" ( Argon2id hash )
-    password: "\$argon2id\$v=19\$m=65536,t=3,p=4\$Dn6H69Yp9GqG6iLp7Zz2Yg\$Fv/KAnAbe6Dk8w7p/L2+GjH5YFzC/D7B8E5g6G6/7gE"
+    password: "$ADMIN_HASH"
     email: "admin@homelab.local"
     groups:
       - admins

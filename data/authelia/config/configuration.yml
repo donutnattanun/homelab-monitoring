@@ -21,7 +21,7 @@ storage:
     port: 5432
     database: authelia
     username: authelia
-    password: "file:/secrets/STORAGE_PASSWORD"
+    password: "StrongPassword123"
 
 authentication_backend:
   file: 
