@@ -28,7 +28,6 @@ fi
 echo ">> Generating Authelia Secrets..."
 mkdir -p data/authelia/secrets
 
-# เจนรหัสสุ่ม 64 ตัวอักษรสำหรับ Secrets
 for secret in JWT_SECRET SESSION_SECRET STORAGE_ENCRYPTION_KEY; do
   if [ ! -f "data/authelia/secrets/$secret" ]; then
     openssl rand -base64 48 >"data/authelia/secrets/$secret"
@@ -68,12 +67,14 @@ users:
     groups:
       - admins
 EOF
-  echo "✅ Generated users.yml with default user 'admin' (pass: password)"
+  echo "✅ Generated users.yml with default user 'admin' (pass: admin123)"
 fi
 
 echo "------------------------------------------------"
 echo "✅ Setup Complete!"
 echo "📍 Please add the following to your /etc/hosts:"
 echo "127.0.0.1  auth.$DOMAIN monitor.$DOMAIN"
+echo "This project uses self-signed certificates for local development."
+echo "When accessing via browser, you will see a security warning."
+echo "Please click "Advanced" → "Accept the Risk and Continue"."
 echo "------------------------------------------------"
-echo "Run 'make up' to start the system."
