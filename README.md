@@ -1,18 +1,24 @@
 # homelab-monitoring
+
 This project demonstrates a production-style authentication and monitoring architecture using open-source components, designed for local homelab / internal infrastructure use.
 
 The focus is not on UI polish, but on network isolation, auth boundaries, reverse proxy design
 
 # Quick Start
+
   1.Clone Repository
+
 ``` bash
    git clone https://github.com/donutnattanun/homelab-monitoring
    cd homelab-monitoring
 ```
+
   2.One-Command Setup
+
 ```bash
   make up
 ```
+
 ### 🛠️ Makefile Commands
 
 | Command        | Description                 |
@@ -25,6 +31,7 @@ The focus is not on UI polish, but on network isolation, auth boundaries, revers
 | `make clean`   | clean (DB + secrets) |
 
 ## Architecture
+
 ```text
                 ┌────────────┐
                 │   Browser  │
@@ -48,7 +55,9 @@ The focus is not on UI polish, but on network isolation, auth boundaries, revers
    └─────────────┘        └────────────────┘
 
 ```
+
 ## Key Design Decisions
+
 1. Single Public Entry Point (NGINX)
 
 - Only NGINX exposes ports to the host
@@ -116,4 +125,3 @@ This is expected.
 - Avoids forcing users to install custom CAs
 
 In production, certificates should be issued by a trusted CA (e.g. Let’s Encrypt).
-
